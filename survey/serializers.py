@@ -4,13 +4,14 @@ from survey.models import Survey, Question, Users, Answer
 
 
 class SurveySerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Survey
-        fields = ('name', 'start_date', 'end_date', 'description',)
+        fields = ('name', 'start_date', 'end_date', 'description', 'visible')
 
 
 class QuestionSerializer(serializers.ModelSerializer):
-    survey = SurveySerializer()
+    # survey = SurveySerializer()
 
     class Meta:
         model = Question

@@ -11,6 +11,7 @@ class ActiveSurveysView(APIView):
     """
     View вывода активных опросов
     """
+
     def get(self, request):
         surveys = Survey.objects.filter(visible=True).all()
         serializer = SurveySerializer(surveys, many=True)
@@ -27,6 +28,7 @@ class GoSurvey(APIView):
     Если пользователя с user_id не существует, создаёт пользователя с user_id
     и возвращает JSON всех активных опросов с вопросами вида {'Название опроса': 'Вопросы'}
     """
+
     def get(self, request):
         user_id = request.GET.get('user_id')
         survey_id = request.GET.get('survey_id')
@@ -37,7 +39,7 @@ class GoSurvey(APIView):
             questions = Question.objects.filter(survey=surveys.id).all()
             for question in questions:
                 questions_set.update({question.text: question.question_type})
-            return Response(questions_set)
+            return Response({surveys.name: questions_set})
         if user_surveys:
             for user in user_surveys:
                 for survey in user.survey.all():
@@ -76,3 +78,29 @@ def get_answer(request):
         else:
             return Response(serializer.errors, status=status.HTTP_409_CONFLICT)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class CreateSurvey(APIView):
+
+    def post(self, request):
+        if request.method == 'POST':
+            serializer = SurveySerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+            else:
+                return Response(serializer.errors, status=status.HTTP_409_CONFLICT)
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class CreateQuestion(APIView):
+
+    def post(self, request):
+        if request.method == 'POST':
+            serializer = QuestionSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+            else:
+                return Response(serializer.errors, status=status.HTTP_409_CONFLICT)
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
