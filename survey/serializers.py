@@ -7,11 +7,10 @@ class SurveySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Survey
-        fields = ('name', 'start_date', 'end_date', 'description', 'visible')
+        fields = ('id', 'name', 'start_date', 'end_date', 'description', 'visible')
 
 
 class QuestionSerializer(serializers.ModelSerializer):
-    # survey = SurveySerializer()
 
     class Meta:
         model = Question
@@ -19,6 +18,7 @@ class QuestionSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Users
         fields = '__all__'
@@ -28,7 +28,8 @@ class AnswerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Answer
-        fields = '__all__'
+        # fields = '__all__'
+        fields = ('user_id', 'question', 'data')
 
     def create(self, validated_data):
         return Answer.objects.create(**validated_data)
