@@ -109,27 +109,30 @@ class UserGetOrCreate(APIView):
 class CreateSurvey(APIView):
     """
     Endpoint создания опроса
+    POST запрос на создание опроса.
+    PATCH запрос на редактирование опроса.
+    Для удаления опроса передайте PATCH запросом {"visible": false}
     Принимает на вход параметры:
     :param
         name: название опроса
-        start_date: дата начала опроса
-        end_date: дата окончания опроса
+        start_date: дата начала опроса формата YYYY-MM-DD
+        end_date: дата окончания опроса формата YYYY-MM-DD
         description: описание опроса
         visible: активен опрос или нет
     :return
         JSON вида {
                 name: название опроса,
-                start_date: дата начала опроса,
-                end_date: дата окончания опроса,
+                start_date: дата начала опроса формата YYYY-MM-DD,
+                end_date: дата окончания опроса формата YYYY-MM-DD,
                 description: описание опроса,
                 visible: активен опрос или нет,
             }
     """
 
     @swagger_auto_schema(
-        tags=['Создание опроса'],
-        operation_id='Create survey',
-        operation_description='Создание опроса',
+        tags=['Создание/редактирование опроса'],
+        operation_id='Create/update survey',
+        operation_description='Создание/редактирование опроса',
         responses={
             '201': 'Created',
             '409': 'Conflict'
@@ -138,8 +141,8 @@ class CreateSurvey(APIView):
             type=openapi.TYPE_OBJECT,
             properties={
                 'name': openapi.Schema(type=openapi.TYPE_STRING, description='Название опроса'),
-                'start_date': openapi.Schema(type=openapi.TYPE_STRING, description='Дата старта'),
-                'end_date': openapi.Schema(type=openapi.TYPE_STRING, description='Дата окончания'),
+                'start_date': openapi.Schema(type=openapi.TYPE_STRING, description='Дата старта формата YYYY-MM-DD'),
+                'end_date': openapi.Schema(type=openapi.TYPE_STRING, description='Дата окончания формата YYYY-MM-DD'),
                 'description': openapi.Schema(type=openapi.TYPE_STRING, description='Описание опроса'),
                 'visible': openapi.Schema(type=openapi.TYPE_STRING, description='Активен или нет'),
             }
@@ -154,6 +157,13 @@ class CreateSurvey(APIView):
                 return Response(serializer.errors, status=status.HTTP_409_CONFLICT)
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def patch(self, request):
+        survey = Survey.objects.get(id=request.data['survey_id'])
+        serializer = SurveySerializer(survey, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class CreateQuestion(APIView):
@@ -269,6 +279,7 @@ class GetUserAnswers(APIView):
             ]
         }
     """
+
     @swagger_auto_schema(
         tags=['Получение ответов пользователя'],
         operation_id='Get user answers',
