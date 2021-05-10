@@ -33,15 +33,15 @@ python manage.py runserver
 
 http://{ваш_сайт}/admin/
 
-SWAGGER с полным описанием:
+####SWAGGER с полным описанием:
 
-Все endpoint'ы и взаимодействие с ними прописаны там
+####Все endpoint'ы и взаимодействие с ними прописаны там
 
 http://{ваш_сайт}/swagger/
 
-Endpoints кратко:
+####Endpoints кратко:
 
-[http://{ваш_сайт}/getActiveSurveys/](http://{ваш_сайт}/getActiveSurveys/ "Получение списка активных опросов")
+http://{ваш_сайт}/getActiveSurveys/ - Получение списка активных опросов
 
 http://{ваш_сайт}/getSurvey/ - Пройти опрос
 
