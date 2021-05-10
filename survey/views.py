@@ -110,8 +110,6 @@ class CreateSurvey(APIView):
     """
     Endpoint создания опроса
     POST запрос на создание опроса.
-    PATCH запрос на редактирование опроса.
-    Для удаления опроса передайте PATCH запросом {"visible": false}
     Принимает на вход параметры:
     :param
         name: название опроса
@@ -130,9 +128,9 @@ class CreateSurvey(APIView):
     """
 
     @swagger_auto_schema(
-        tags=['Создание/редактирование опроса'],
-        operation_id='Create/update survey',
-        operation_description='Создание/редактирование опроса',
+        tags=['Создание опроса'],
+        operation_id='Create survey',
+        operation_description='Создание опроса',
         responses={
             '201': 'Created',
             '409': 'Conflict'
@@ -144,7 +142,7 @@ class CreateSurvey(APIView):
                 'start_date': openapi.Schema(type=openapi.TYPE_STRING, description='Дата старта формата YYYY-MM-DD'),
                 'end_date': openapi.Schema(type=openapi.TYPE_STRING, description='Дата окончания формата YYYY-MM-DD'),
                 'description': openapi.Schema(type=openapi.TYPE_STRING, description='Описание опроса'),
-                'visible': openapi.Schema(type=openapi.TYPE_STRING, description='Активен или нет'),
+                'visible': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Активен или нет'),
             }
         )
     )
@@ -158,12 +156,90 @@ class CreateSurvey(APIView):
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+
+class UpdateSurvey(APIView):
+    """
+    Endpoint редактирования опроса
+    PATCH запрос на редактирование опроса.
+    Принимает на вход параметры:
+    :param
+        name: название опроса
+        start_date: дата начала опроса формата YYYY-MM-DD
+        end_date: дата окончания опроса формата YYYY-MM-DD
+        description: описание опроса
+        visible: активен опрос или нет
+    :return
+        JSON вида {
+                name: название опроса,
+                start_date: дата начала опроса формата YYYY-MM-DD,
+                end_date: дата окончания опроса формата YYYY-MM-DD,
+                description: описание опроса,
+                visible: активен опрос или нет,
+            }
+    """
+
+    @swagger_auto_schema(
+        tags=['Редактирование опроса'],
+        operation_id='Update survey',
+        operation_description='Редактирование опроса',
+        responses={
+            '201': 'Created',
+            '409': 'Conflict'
+        },
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'survey_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='id опроса'),
+                'name': openapi.Schema(type=openapi.TYPE_STRING, description='Название опроса'),
+                'end_date': openapi.Schema(type=openapi.TYPE_STRING, description='Дата окончания формата YYYY-MM-DD'),
+                'description': openapi.Schema(type=openapi.TYPE_STRING, description='Описание опроса'),
+                'visible': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Активен или нет'),
+            }
+        )
+    )
     def patch(self, request):
         survey = Survey.objects.get(id=request.data['survey_id'])
         serializer = SurveySerializer(survey, data=request.data)
         if serializer.is_valid():
             serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_409_CONFLICT)
+
+
+class DeleteSurvey(APIView):
+    """
+    Endpoint удаления запроса
+    DELETE запрос с параметром:
+    :param
+        survey_id: id опроса
+    """
+
+    @swagger_auto_schema(
+        tags=['Удаление опроса'],
+        operation_id='Delete survey',
+        operation_description='Удаление опроса',
+        responses={
+            '204': 'No content',
+            '404': 'Not found'
+        },
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'survey_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='id опроса'),
+            }
+        )
+    )
+    def delete(self, request):
+        try:
+            survey = Survey.objects.get(id=request.data['survey_id'])
+        except Exception as e:
+            survey = None
+        if survey:
+            survey.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 class CreateQuestion(APIView):
@@ -214,8 +290,96 @@ class CreateQuestion(APIView):
                 serializer.save()
             else:
                 return Response(serializer.errors, status=status.HTTP_409_CONFLICT)
-
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class UpdateQuestion(APIView):
+    """
+    Endpoint редактирования вопроса.
+    Принимает на вход параметры:
+    :param
+        question_id: id вопроса
+        survey: id опроса
+        text: текст вопроса
+        question_type: тип вопроса (
+                        TEXT: ответ текстом,
+                        SELECT: ответ с выбором одного варианта,
+                        SELECT_MULTIPLE: ответ с выбором нескольких вариантов)
+    :return
+        JSON вида {
+                'id': id вопроса
+                'survey': id опроса,
+                'text': текст вопроса,
+                'question_type': тип вопроса
+            }
+    """
+
+    @swagger_auto_schema(
+        tags=['Редактирование вопроса'],
+        operation_id='Update question',
+        operation_description='Редактирование вопроса',
+        responses={
+            '201': 'Created',
+            '409': 'Conflict'
+        },
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'question_id': openapi.Schema(type=openapi.TYPE_STRING, description='id опроса'),
+                'survey': openapi.Schema(type=openapi.TYPE_STRING, description='id опроса'),
+                'text': openapi.Schema(type=openapi.TYPE_STRING, description='Текст вопроса'),
+                'question_type': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description='Тип вопроса ('
+                                'TEXT: ответ текстом, '
+                                'SELECT: ответ с выбором одного варианта, '
+                                'SELECT_MULTIPLE: ответ с выбором нескольких вариантов)'),
+            }
+        )
+    )
+    def patch(self, request):
+        question = Question.objects.get(id=request.data['question_id'])
+        serializer = QuestionSerializer(question, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_409_CONFLICT)
+
+
+class DeleteQuestion(APIView):
+    """
+    Endpoint удаления вопроса
+    DELETE запрос с параметром:
+    :param
+        question_id: id вопроса
+    """
+    @swagger_auto_schema(
+        tags=['Удаление вопроса'],
+        operation_id='Delete question',
+        operation_description='Удаление вопроса',
+        responses={
+            '204': 'No content',
+            '404': 'Not found'
+        },
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'question_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='id вопроса'),
+            }
+        )
+    )
+
+    def delete(self, request):
+        try:
+            question = Question.objects.get(id=request.data['question_id'])
+        except Exception as e:
+            question = None
+        if question:
+            question.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 class PostAnswer(APIView):

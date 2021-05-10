@@ -8,7 +8,8 @@ class SurveySerializer(serializers.ModelSerializer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.instance is not None:
-            self.fields.get('end_date').read_only = True
+            self.fields.get('id').required = True
+            self.fields.get('start_date').read_only = True
 
     class Meta:
         model = Survey
@@ -16,21 +17,23 @@ class SurveySerializer(serializers.ModelSerializer):
 
 
 class QuestionSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Question
-        fields = ('survey', 'text', 'question_type',)
+        fields = ('id', 'survey', 'text', 'question_type',)
 
 
 class UserSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Users
         fields = '__all__'
 
 
 class AnswerSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Answer
-        # fields = '__all__'
         fields = ('user_id', 'question', 'data')
 
     def create(self, validated_data):
