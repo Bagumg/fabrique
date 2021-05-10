@@ -33,11 +33,29 @@ python manage.py runserver
 
 http://{ваш_сайт}/admin/
 
+SWAGGER с полным описанием:
+Все endpoint'ы и взаимодействие с ними прописаны там
+http://{ваш_сайт}/swagger/
 
-Ссылки:
-
+Endpoints кратко:
 http://{ваш_сайт}/getActiveSurveys/ - Получение списка активных опросов
 
-http://{ваш_сайт}/goSurvey/?survey_id={ID опроса} - Пройти выбранный опрос
+http://{ваш_сайт}/getSurvey/ - Пройти опрос
 
-http://{ваш_сайт}/goSurvey/?user_id={ID пользователя} - Получение пройденных пользователем опросов
+http://{ваш_сайт}/getUserOrCreate/ - Создание пользователя
+
+http://{ваш_сайт}/getUserAnswers/ - Получение пройденных пользователем опросов с детализацией по ответам
+
+http://{ваш_сайт}/createAnswer/ - Создание/приём ответа
+
+http://{ваш_сайт}/createSurvey/ - Создание опроса
+
+http://{ваш_сайт}/updateSurvey/ - Редактирование опроса
+
+http://{ваш_сайт}/deleteSurvey/ - Удаление опроса
+
+http://{ваш_сайт}/createQuestion/ - Создание вопроса
+
+http://{ваш_сайт}/updateQuestion/ - Редактирование вопроса
+
+http://{ваш_сайт}/deleteQuestion/ - Удаление вопроса
