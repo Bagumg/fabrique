@@ -3,6 +3,19 @@ from datetime import date
 from django.db import models
 
 
+class Users(models.Model):
+    """
+    Модель пользователя
+    """
+
+    class Meta:
+        verbose_name = 'пользователь'
+        verbose_name_plural = 'пользователи'
+
+    def __str__(self):
+        return str(self.id)
+
+
 class Survey(models.Model):
     """
     Модель опроса
@@ -48,7 +61,7 @@ class Answer(models.Model):
     """
     question = models.ForeignKey(Question, on_delete=models.CASCADE, verbose_name='Вопрос')
     data = models.TextField(verbose_name='Данные ответа')
-    user_id = models.IntegerField(default=0, verbose_name='ID пользователя')
+    user_id = models.ForeignKey(Users, default=1, on_delete=models.CASCADE, verbose_name='ID пользователя', blank=False)
 
     class Meta:
         verbose_name = 'ответ'
@@ -56,19 +69,3 @@ class Answer(models.Model):
 
     def __str__(self):
         return f'Ответ на вопрос: {self.question}'
-
-
-class Users(models.Model):
-    """
-    Модель пользователя
-    """
-    survey = models.ManyToManyField(Survey, blank=True, verbose_name='Опросы')
-    question = models.ManyToManyField(Question, blank=True, verbose_name='Вопросы')
-    answer = models.ManyToManyField(Answer, blank=True, verbose_name='Ответы')
-
-    class Meta:
-        verbose_name = 'пользователь'
-        verbose_name_plural = 'пользователи'
-
-    def __str__(self):
-        return str(self.id)
